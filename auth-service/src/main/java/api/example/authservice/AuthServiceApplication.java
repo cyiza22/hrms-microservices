@@ -1,13 +1,13 @@
-package api.example.shared;
+package api.example.authservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SharedLibraryApplication {
+public class AuthServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SharedLibraryApplication.class, args);
+		SpringApplication.run(AuthServiceApplication.class, args);
 	}
 
 }

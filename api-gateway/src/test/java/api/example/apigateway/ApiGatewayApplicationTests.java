@@ -1,10 +1,10 @@
-package api.example.shared;
+package api.example.apigateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SharedLibraryApplicationTests {
+class ApiGatewayApplicationTests {
 
 	@Test
 	void contextLoads() {
