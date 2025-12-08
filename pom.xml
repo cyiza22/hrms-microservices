@@ -17,10 +17,10 @@
         <module>eureka-server</module>
         <module>api-gateway</module>
         <module>auth-service</module>
-<!--        <module>employee-service</module>-->
-<!--        <module>payroll-service</module>-->
-<!--        <module>leave-service</module>-->
-<!--        <module>project-service</module>-->
+        <module>employee-service</module>
+        <module>payroll-service</module>
+        <module>leave-service</module>
+        <module>project-service</module>
     </modules>
 
     <properties>
