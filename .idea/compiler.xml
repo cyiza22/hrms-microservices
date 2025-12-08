@@ -20,7 +20,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="auth-service" options="" />
-      <module name="project-service" options="-parameters" />
+      <module name="project-service" options="" />
       <module name="shared-library" options="" />
     </option>
   </component>

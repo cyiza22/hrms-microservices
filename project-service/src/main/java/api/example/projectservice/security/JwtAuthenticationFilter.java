@@ -1,4 +1,4 @@
-package api.example.payrollservice.security;
+package api.example.projectservice.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

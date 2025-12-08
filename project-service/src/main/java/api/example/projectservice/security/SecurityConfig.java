@@ -1,6 +1,6 @@
-package api.example.leaveservice.security;
+package api.example.projectservice.security;
 
-
+import api.example.employeeservice.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
