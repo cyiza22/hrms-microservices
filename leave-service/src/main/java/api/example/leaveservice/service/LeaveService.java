@@ -4,6 +4,7 @@ import api.example.leaveservice.dto.LeaveDTO;
 import api.example.leaveservice.dto.EmployeeDTO;
 import api.example.leaveservice.entity.Leave;
 import api.example.leaveservice.repository.LeaveRepository;
+import api.example.leaveservice.observer.LeaveObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,20 @@ public class LeaveService {
     private final LeaveRepository leaveRepository;
     private final RestTemplate restTemplate;
     private static final String EMPLOYEE_SERVICE_URL = "http://employee-service/api/employees";
+    private final List<LeaveObserver> observers;
+
+    private void notifyObservers(Leave leave) {
+        log.info("Notifying {} observers about leave status change", observers.size());
+        observers.forEach(observer -> {
+            try {
+                log.debug("Notifying observer: {}", observer.getObserverName());
+                observer.onLeaveStatusChanged(leave);
+            } catch (Exception e) {
+                log.error("Observer {} failed: {}",
+                        observer.getObserverName(), e.getMessage());
+            }
+        });
+    }
 
     @Transactional
     public LeaveDTO applyLeave(LeaveDTO dto) {
@@ -42,8 +57,45 @@ public class LeaveService {
 
         Leave saved = leaveRepository.save(leave);
         log.info("Leave applied by employee: {}", dto.getEmployeeId());
+
+        // NOTIFY OBSERVERS
+        notifyObservers(saved);
+
         return mapToDTO(saved, employee);
     }
+
+    @Transactional
+    public LeaveDTO approveLeave(Long id) {
+        Leave leave = leaveRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Leave not found"));
+
+        leave.setStatus(Leave.LeaveStatus.APPROVED);
+        Leave updated = leaveRepository.save(leave);
+        log.info("Leave approved: {}", id);
+
+        // NOTIFY OBSERVERS
+        notifyObservers(updated);
+
+        return mapToDTO(updated);
+    }
+
+    @Transactional
+    public LeaveDTO rejectLeave(Long id, String rejectionReason) {
+        Leave leave = leaveRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Leave not found"));
+
+        leave.setStatus(Leave.LeaveStatus.REJECTED);
+        leave.setReason(leave.getReason() + " (Rejected: " + rejectionReason + ")");
+        Leave updated = leaveRepository.save(leave);
+        log.info("Leave rejected: {}", id);
+
+        // NOTIFY OBSERVERS
+        notifyObservers(updated);
+
+        return mapToDTO(updated);
+    }
+
+
 
     public List<LeaveDTO> getAllLeaves() {
         return leaveRepository.findAll().stream()
@@ -63,28 +115,7 @@ public class LeaveService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    public LeaveDTO approveLeave(Long id) {
-        Leave leave = leaveRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Leave not found"));
 
-        leave.setStatus(Leave.LeaveStatus.APPROVED);
-        Leave updated = leaveRepository.save(leave);
-        log.info("Leave approved: {}", id);
-        return mapToDTO(updated);
-    }
-
-    @Transactional
-    public LeaveDTO rejectLeave(Long id, String rejectionReason) {
-        Leave leave = leaveRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Leave not found"));
-
-        leave.setStatus(Leave.LeaveStatus.REJECTED);
-        leave.setReason(leave.getReason() + " (Rejected: " + rejectionReason + ")");
-        Leave updated = leaveRepository.save(leave);
-        log.info("Leave rejected: {}", id);
-        return mapToDTO(updated);
-    }
 
     private EmployeeDTO getEmployee(Long employeeId) {
         try {

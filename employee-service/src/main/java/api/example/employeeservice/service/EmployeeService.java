@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+import api.example.employeeservice.factory.EmployeeFactoryProvider;
 
 @Slf4j
 @Service
@@ -19,6 +20,7 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
+    private final EmployeeFactoryProvider factoryProvider; // ADD THIS
 
     @Transactional
     public EmployeeDTO createEmployee(EmployeeDTO dto) {
@@ -26,11 +28,26 @@ public class EmployeeService {
             throw new RuntimeException("Employee with email already exists");
         }
 
-        Employee employee = mapToEntity(dto);
+        // USE FACTORY PATTERN HERE - REPLACE OLD mapToEntity METHOD
+        String employeeType = dto.getEmployeeType() != null ?
+                dto.getEmployeeType() : "PERMANENT";
+
+        Employee employee = factoryProvider
+                .getFactory(employeeType)
+                .createEmployee(dto);
+
+        // Handle department if provided
+        if (dto.getDepartmentId() != null) {
+            Department dept = departmentRepository.findById(dto.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department not found"));
+            employee.setDepartment(dept);
+        }
+
         Employee saved = employeeRepository.save(employee);
-        log.info("Created employee: {}", saved.getEmail());
+        log.info("Created employee using {} factory: {}", employeeType, saved.getEmail());
         return mapToDTO(saved);
     }
+
 
     public List<EmployeeDTO> getAllEmployees() {
         return employeeRepository.findAll().stream()
