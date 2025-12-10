@@ -1,4 +1,4 @@
-package api.example.employeeservice.config;
+package api.example.payrollservice.config;
 
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
